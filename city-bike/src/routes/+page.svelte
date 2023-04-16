@@ -1,18 +1,25 @@
-<p>Here we have bike stuff</p>
-
-<div class="table">
-    <div class="tableheader">
-        <div class="tablecell">Greetings</div>
-        <div class="tablecell">For you</div>
-    </div>
-    <div class="tablerow">
-        <div class="tablecell">Hello</div>
-        <div class="tablecell">There</div>
+<div class="page-content">
+    <p>Here we have bike stuff</p>
+    
+    <div class="table">
+        <div class="tableheader">
+            <div class="tablecell">Greetings</div>
+            <div class="tablecell">For you</div>
+        </div>
+        <div class="tablerow">
+            <div class="tablecell">Hello</div>
+            <div class="tablecell">There</div>
+        </div>
     </div>
 </div>
 
 <style>
+    .page-content {
+        text-align: center;
+        margin: auto;
+    }
     .table {
+        margin: auto;
         display: table;
         border: 1px solid #ccc;
         border-collapse: collapse;
