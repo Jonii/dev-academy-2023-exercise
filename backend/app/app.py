@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import time
 
 from .trips import get_trips
 
@@ -19,5 +20,6 @@ app.add_middleware(
 @app.get("/api/bike-trips")
 async def trips():
     trip_list = get_trips()
+    time.sleep(1)
     print(trip_list)
     return trip_list
