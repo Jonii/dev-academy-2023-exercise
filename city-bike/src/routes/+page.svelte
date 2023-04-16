@@ -1,3 +1,20 @@
+<script lang="ts">
+    import { onMount } from 'svelte';
+    type BikeTrip = {
+        Departure: String;
+        "Departure station name": String;
+    };
+    let data: BikeTrip[] = [];
+    async function fetchData() {
+        const response = await fetch("http://localhost:8000/api/bike-trips");
+        console.log(response.status);
+        data = await response.json();
+    }
+    onMount(() => { 
+        fetchData();
+    });
+</script>
+
 <div class="page-content">
     <p>Here we have bike stuff</p>
     
@@ -10,6 +27,12 @@
             <div class="tablecell">Hello</div>
             <div class="tablecell">There</div>
         </div>
+        {#each data as datum}
+            <div class="tablerow">
+                <div class="tablecell">{datum["Departure"]}</div>
+                <div class="tablecell">{datum["Departure station name"]}</div>
+            </div>
+        {/each}
     </div>
 </div>
 
