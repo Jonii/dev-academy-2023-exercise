@@ -1,38 +1,39 @@
 <script lang="ts">
-    let sliderValue = 100;
-    let selectedTime = 0;
-    let selectedTimeFinal = 0;
-    let centerValue = 100;
+    let centerValue = 50;
+    let sliderValue = centerValue;
     let min = 0;
-    let max = 200;
-
-    export let selectedDate: Date = new Date();
+    let max = 100;
+    export let valueToUnit = _valueToUnit;
+    export let selectedValue: Date = new Date();
     let dateSelectorDisplayVal = new Date();
     const timeRadius = 1000 * 60 * 60 * 12;
 
-    
-    function updateSelectedTimeBasedOn(baseTime: Date = selectedDate) {
-        const relativeValue = (sliderValue - centerValue) / (max - min);
-        const timeChange =
-            timeRadius * Math.pow(relativeValue, 2) * Math.sign(relativeValue);
-            selectedTime = timeChange;
-            const newDate = new Date();
-        newDate.setTime(baseTime.getTime() + selectedTime);
+    function _valueToUnit(basevalue: Date, rawUnitless: number): Date {
+        timeRadius;        
+        const scaledUnitless =
+            timeRadius * Math.pow(rawUnitless, 2) * Math.sign(rawUnitless);
+        const newDate = new Date();
+        newDate.setTime(basevalue.getTime() + scaledUnitless);
+        return newDate;
+    }
+
+    function normalizedSliderValue(): number {
+        if (sliderValue > centerValue) {
+            return (sliderValue - centerValue) / (max - centerValue);
+        }
+        return (sliderValue - centerValue) / (centerValue - min);
+    }
+
+    function updateViewValue(baseTime: Date = selectedValue) {
+        const newDate: Date = valueToUnit(baseTime, normalizedSliderValue());
         dateSelectorDisplayVal = newDate;
     }
-    function updateSelectedTime() {
-        updateSelectedTimeBasedOn(selectedDate);
-    }
-    $: updateSelectedTimeBasedOn(selectedDate);
+    $: updateViewValue(selectedValue);
     
     function resetSlider() {
-        setTimeout(() => {
-            selectedDate.setTime(selectedDate.getTime() + selectedTime);
-            selectedTimeFinal = selectedTime;
-            sliderValue = centerValue;
-        }, 100);
+        selectedValue.setTime(dateSelectorDisplayVal.getTime());
+        sliderValue = centerValue;
     }
-    //$: console.log("Selected time:", selectedTime);
 </script>
 
 <div>
@@ -41,20 +42,11 @@
         bind:value={sliderValue}
         {min}
         {max}
-        on:input={updateSelectedTime}
-        on:mouseup={resetSlider}
+        on:input={() => updateViewValue(selectedValue)}
+        on:change={resetSlider}
     />
     <p>Slider value: {sliderValue}</p>
-    <!---
 
-    <p>Selected time: {selectedTime} ms</p>
-    <p>
-        Selected time: <span>{selectedDate.toLocaleTimeString()}</span>
-        <span style="font-size: 0.8rem"
-            >{selectedDate.toLocaleDateString("fi-Fi")}</span
-        >
-    </p>
-    -->
     <p>
         Selected time: <span>{dateSelectorDisplayVal.toLocaleTimeString()}</span>
         <span style="font-size: 0.8rem">{dateSelectorDisplayVal.toLocaleDateString("fi-Fi")}</span>

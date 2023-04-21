@@ -25,7 +25,7 @@
 
 <div class="page-content">
     <p>Here we have bike stuff</p>
-    <LogSlider bind:selectedDate={start_time}/>
+    <LogSlider bind:selectedValue={start_time}/>
     
     <Table data={data}/>
 </div>
