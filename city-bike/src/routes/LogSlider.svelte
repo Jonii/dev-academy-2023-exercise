@@ -17,6 +17,7 @@
     $: sliderElement && sliderElement.style.setProperty('--highlight-center', `${sliderValue}%`);
     $: console.log(centerValue);
     $: console.log(sliderValue);
+
     function _valueToUnit(basevalue: Date, rawUnitless: number): Date {
         timeRadius;        
         const scaledUnitless =
@@ -26,8 +27,8 @@
         return newDate;
     }
 
-    function normalizedSliderValue(): number {
-        return (sliderValue - centerValue) / ((max - min) / 2);
+    function normalizedSliderValue(val: number = sliderValue): number {
+        return (val - centerValue) / ((max - min) / 2);
     }
 
     function updateViewValue(baseTime: Date = selectedValue) {
@@ -74,6 +75,11 @@
         console.log(JSON.stringify(markerPositions));
         return markerPositions;
     }
+
+
+    function markerWidth(marker: Marker) {
+        return Math.pow(Math.abs(normalizedSliderValue(marker.position)) + 1, -3) * 60;
+    }
 </script>
 
 <div>
@@ -90,10 +96,10 @@
         {#each markers as marker (marker.dateKey)}
             <div 
                 class="slider-marker" 
-                style="left: {marker.position}%"
+                style="left: {marker.position}%; width: {markerWidth(marker)}px"
                 animate:flip={{ duration: 100 }}
                 transition:fly="{{ x: Math.sign(marker.position - 50) * 150, duration: 100 }}"
-            ></div>
+            >{marker.date.getHours()}:00</div>
         {/each}
     </div>
     <!--
@@ -159,12 +165,19 @@
     }
     .slider-container {
         position: relative;
+        overflow: hidden;
     }
     .slider-marker {
         position: absolute;
+        box-sizing: border-box;
         width: 2px;
-        height: 10px;
-        background: #000000;
-        bottom: 5px;
+        height: 16px;
+        background: #857cff;
+        border-radius: 5px;
+        border: 1px solid black;
+        bottom: -1px;
+        transform: translateX(-50%);
+        font-size: 10px;
+        overflow: hidden;
     }
 </style>
