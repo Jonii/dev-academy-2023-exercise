@@ -6,7 +6,7 @@
 
     const animationDuration = 150;
     const min = 0;
-    const max = 101;
+    const max = 1001;
     const centerValue = (min + max) / 2;
     
     let sliderValue = centerValue;
@@ -17,7 +17,7 @@
     const timeRadius = 1000 * 60 * 60 * 6;
     let markers: Marker[] = generateNonLinearMarkers(10, selectedValue, centerValue);
 
-    $: sliderElement && sliderElement.style.setProperty('--highlight-center', `${sliderValue}%`);
+    $: sliderElement && sliderElement.style.setProperty('--highlight-center', `${sliderValue * 100 / (max - min)}%`);
     $: console.log(centerValue);
     $: console.log(sliderValue);
     //$: tweenDuration = animateThumb ? animationDuration : 200;
@@ -49,7 +49,7 @@
     function unitToValue(time: number, selectedValue: Date, centerValue: number) {
         const delta = (time - selectedValue.getTime()) / timeRadius;
         const deltaUnscaled = delta > 0 ? Math.pow(delta, 1/3) : -Math.pow(-delta, 1/3);
-        return centerValue + (deltaUnscaled * 50);
+        return centerValue + (deltaUnscaled * ((max - min) / 2));
     }
 
     function updateViewValue(baseTime: Date = selectedValue) {
@@ -59,10 +59,9 @@
     $: updateViewValue(selectedValue);
     
     async function resetSlider() {
-        console.log("Resetting slider and doing all such stuff");
-        selectedValue.setTime(dateSelectorDisplayVal.getTime());
+        markers = generateNonLinearMarkers(10, dateSelectorDisplayVal, centerValue);
         
-        markers = generateNonLinearMarkers(10, selectedValue, centerValue);
+        selectedValue.setTime(dateSelectorDisplayVal.getTime());
         
         const tweenedValue = tweened(sliderValue, { duration: animationDuration, easing: linear });
         tweenedValue.subscribe(($value) => {
@@ -103,6 +102,10 @@
         return markerPositions;
     }
 
+    function boxAdjustingTerm(marker: Marker): number {
+        return (marker.markerWidth * 0.155 * (marker.position - centerValue) / (max-min))
+    }
+
     $: sliderElement && sliderElement.style.setProperty('--thumb-width', `${Math.round(markerWidth(sliderValue, 100))}px`);
 </script>
 
@@ -120,9 +123,9 @@
         {#each markers as marker (marker.dateKey)}
             <div 
                 class="slider-marker" 
-                style="left: {marker.position}%; width: {marker.markerWidth}px"
+                style="left: {marker.position * 100 / (max - min) - boxAdjustingTerm(marker)}%; width: {marker.markerWidth}px"
                 animate:flip={{ duration: animationDuration }}
-                transition:fly="{{ x: Math.sign(marker.position - 50) * 150, duration: 100 }}"
+                transition:fly="{{ x: Math.sign(marker.position - centerValue) * 150, duration: animationDuration }}"
             >{marker.date.getHours()}:00</div>
         {/each}
     </div>
@@ -177,14 +180,15 @@
     }
 
     input[type=range]::-moz-range-track {
-        width: 100%;
+        width: calc(100% - 3px);
         height: 15px;
+        box-sizing: border-box;
         cursor: pointer;
         background: radial-gradient(circle at var(--highlight-center), #fadfac 20%, #0be930 100%);
                     /* 
                     linear-gradient(to right, transparent 0% calc(var(--highlight-true-center) - 1%), #033112 calc(var(--highlight-true-center) - 1%) calc(var(--highlight-true-center) + 1%), transparent calc(var(--highlight-true-center) + 1%)),
                     */        
-        border: 1px outset black;
+        border: 1.5px outset black;
     }
 
     input[type=range]::-ms-track { 
@@ -194,6 +198,8 @@
     .slider-container {
         position: relative;
         overflow: hidden;
+        margin: 10%;
+        
     }
     .slider-marker {
         position: absolute;
