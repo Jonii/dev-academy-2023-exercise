@@ -1,60 +1,87 @@
 <script lang="ts">
     import { flip } from 'svelte/animate';
     import { fly } from 'svelte/transition';
+    import { tweened } from 'svelte/motion';
+    import { linear } from 'svelte/easing';
 
-    const trueCenter = 50;
-    let centerValue = trueCenter;
+    const animationDuration = 150;
+    const min = 0;
+    const max = 101;
+    const centerValue = (min + max) / 2;
+    
     let sliderValue = centerValue;
-    let min = 0;
-    let max = 100;
-    export let valueToUnit = _valueToUnit;
+
     export let selectedValue: Date = new Date();
     let sliderElement: HTMLElement;
     let dateSelectorDisplayVal = new Date();
     const timeRadius = 1000 * 60 * 60 * 6;
-    let markers: Marker[] = generateNonLinearMarkers(50, selectedValue, centerValue);
+    let markers: Marker[] = generateNonLinearMarkers(10, selectedValue, centerValue);
 
     $: sliderElement && sliderElement.style.setProperty('--highlight-center', `${sliderValue}%`);
     $: console.log(centerValue);
     $: console.log(sliderValue);
+    //$: tweenDuration = animateThumb ? animationDuration : 200;
 
-    function _valueToUnit(basevalue: Date, rawUnitless: number): Date {
-        timeRadius;        
+
+    function valueToUnit(basevalue: Date, rawUnitless: number): Date {
+        timeRadius;
         const scaledUnitless =
-            timeRadius * Math.pow(rawUnitless, 3); //* Math.sign(rawUnitless);
+            timeRadius * valueToUnitlessScaled(rawUnitless) + 100;
         const newDate = new Date();
         newDate.setTime(basevalue.getTime() + scaledUnitless);
         return newDate;
     }
 
-    function normalizedSliderValue(val: number = sliderValue): number {
+    function valueToUnitlessScaled(sliderVal: number) {
+        const normalized = normalizedSliderValue(sliderVal);
+        return Math.pow(normalized, 3);
+    }
+
+    function normalizedSliderValue(val: number): number {
         return (val - centerValue) / ((max - min) / 2);
     }
 
-    function updateViewValue(baseTime: Date = selectedValue) {
-        const newDate: Date = valueToUnit(baseTime, normalizedSliderValue());
-        dateSelectorDisplayVal = newDate;
-    }
-    $: updateViewValue(selectedValue);
-    
-    function resetSlider() {
-        console.log("Resetting slider and doing all such stuff");
-        selectedValue.setTime(dateSelectorDisplayVal.getTime());
-        centerValue = Math.round((sliderValue + trueCenter * 3) / 4);
-        sliderValue = centerValue;
-        markers = generateNonLinearMarkers(50, selectedValue, centerValue);
-    }
+    function markerWidth(pos: number, baseScale: number = 60) {
+        const val = Math.pow(Math.abs(normalizedSliderValue(pos)) + 1, -3) * baseScale;
+        return val;
+    }    
 
     function unitToValue(time: number, selectedValue: Date, centerValue: number) {
         const delta = (time - selectedValue.getTime()) / timeRadius;
         const deltaUnscaled = delta > 0 ? Math.pow(delta, 1/3) : -Math.pow(-delta, 1/3);
         return centerValue + (deltaUnscaled * 50);
     }
+
+    function updateViewValue(baseTime: Date = selectedValue) {
+        const newDate: Date = valueToUnit(baseTime, sliderValue);
+        dateSelectorDisplayVal = newDate;
+    }
+    $: updateViewValue(selectedValue);
+    
+    async function resetSlider() {
+        console.log("Resetting slider and doing all such stuff");
+        selectedValue.setTime(dateSelectorDisplayVal.getTime());
+        
+        markers = generateNonLinearMarkers(10, selectedValue, centerValue);
+        
+        const tweenedValue = tweened(sliderValue, { duration: animationDuration, easing: linear });
+        tweenedValue.subscribe(($value) => {
+            sliderValue = $value;
+        });
+
+        await tweenedValue.set(centerValue);
+
+        sliderValue = centerValue;
+
+
+    }
+
     type Marker = {
         position: number;
         date: Date;
         dateKey: number;
         isVisible: boolean;
+        markerWidth: number;
     }
     function generateNonLinearMarkers(markerCount: number, selectedValue: Date, centerValue: number): Marker[] {
         const markerPositions = [];
@@ -70,16 +97,13 @@
             if (!isVisible) {
                 continue;
             }
-            markerPositions.push({position: position, date: new Date(t), dateKey: t, isVisible: isVisible});
+            markerPositions.push({position: position, date: new Date(t), dateKey: t, isVisible: isVisible, markerWidth: markerWidth(position)});
         }
-        console.log(JSON.stringify(markerPositions));
+        //console.log(JSON.stringify(markerPositions));
         return markerPositions;
     }
 
-
-    function markerWidth(marker: Marker) {
-        return Math.pow(Math.abs(normalizedSliderValue(marker.position)) + 1, -3) * 60;
-    }
+    $: sliderElement && sliderElement.style.setProperty('--thumb-width', `${Math.round(markerWidth(sliderValue, 100))}px`);
 </script>
 
 <div>
@@ -96,8 +120,8 @@
         {#each markers as marker (marker.dateKey)}
             <div 
                 class="slider-marker" 
-                style="left: {marker.position}%; width: {markerWidth(marker)}px"
-                animate:flip={{ duration: 100 }}
+                style="left: {marker.position}%; width: {marker.markerWidth}px"
+                animate:flip={{ duration: animationDuration }}
                 transition:fly="{{ x: Math.sign(marker.position - 50) * 150, duration: 100 }}"
             >{marker.date.getHours()}:00</div>
         {/each}
@@ -118,6 +142,7 @@
         --thumb-width: 40px;
         --highlight-center: 50%;
         --highlight-true-center: 50%;
+        --thumb-transform: none;
     }
 
     input[type=range] {
@@ -132,16 +157,19 @@
         box-sizing: content-box;
         width: var(--thumb-width);
         height: var(--thumb-height);
+        transform: var(--thumb-transform);
     }
 
     input[type=range]::-moz-range-thumb {
         width: var(--thumb-width);
         height: var(--thumb-height);
+        transform: var(--thumb-transform);
     }
 
     input[type=range]::-ms-thumb {
         width: var(--thumb-width);
         height: var(--thumb-height);
+        transform: var(--thumb-transform);
     }
 
     input[type=range]::-webkit-slider-runnable-track {
