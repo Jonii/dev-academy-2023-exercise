@@ -180,7 +180,7 @@
     }
 
     input[type=range]::-moz-range-track {
-        width: calc(100% - 3px);
+        width: calc(100% - 6px);
         height: 15px;
         box-sizing: border-box;
         cursor: pointer;
@@ -188,7 +188,7 @@
                     /* 
                     linear-gradient(to right, transparent 0% calc(var(--highlight-true-center) - 1%), #033112 calc(var(--highlight-true-center) - 1%) calc(var(--highlight-true-center) + 1%), transparent calc(var(--highlight-true-center) + 1%)),
                     */        
-        border: 1.5px outset black;
+        border: 2px outset black;
     }
 
     input[type=range]::-ms-track { 
