@@ -3,6 +3,10 @@
     import { fly } from 'svelte/transition';
     import { tweened } from 'svelte/motion';
     import { linear } from 'svelte/easing';
+    import { createEventDispatcher } from 'svelte';
+    import { selectedDate } from './stores';
+
+    const dispatch = createEventDispatcher();
 
     const animationDuration = 150;
     const min = 0;
@@ -11,15 +15,15 @@
     
     let sliderValue = centerValue;
 
-    export let selectedValue: Date = new Date();
     let sliderElement: HTMLElement;
     let dateSelectorDisplayVal = new Date();
     const timeRadius = 1000 * 60 * 60 * 6;
-    let markers: Marker[] = generateNonLinearMarkers(10, selectedValue, centerValue);
+    let markers: Marker[] = generateNonLinearMarkers(10, $selectedDate, centerValue);
 
     $: sliderElement && sliderElement.style.setProperty('--highlight-center', `${sliderValue * 100 / (max - min)}%`);
-    $: console.log(centerValue);
-    $: console.log(sliderValue);
+    $: console.log(selectedDate);
+    //$: console.log(centerValue);
+    //$: console.log(sliderValue);
     //$: tweenDuration = animateThumb ? animationDuration : 200;
 
 
@@ -52,16 +56,18 @@
         return centerValue + (deltaUnscaled * ((max - min) / 2));
     }
 
-    function updateViewValue(baseTime: Date = selectedValue) {
+    function updateViewValue(baseTime: Date = $selectedDate) {
         const newDate: Date = valueToUnit(baseTime, sliderValue);
         dateSelectorDisplayVal = newDate;
     }
-    $: updateViewValue(selectedValue);
+    $: updateViewValue($selectedDate);
     
     async function resetSlider() {
+        console.log("Resetting slider");
         markers = generateNonLinearMarkers(10, dateSelectorDisplayVal, centerValue);
         
-        selectedValue.setTime(dateSelectorDisplayVal.getTime());
+        $selectedDate.setTime(dateSelectorDisplayVal.getTime());
+        $selectedDate = $selectedDate;
         
         const tweenedValue = tweened(sliderValue, { duration: animationDuration, easing: linear });
         tweenedValue.subscribe(($value) => {
@@ -71,9 +77,22 @@
         await tweenedValue.set(centerValue);
 
         sliderValue = centerValue;
-
+        
+        dispatch("dateSet", {
+            date: selectedDate
+        });
 
     }
+
+    function setSlider(value: Date) {
+        console.log("Setting slider value to " + value.toLocaleTimeString() + ".");
+        markers = generateNonLinearMarkers(10, value, centerValue);
+        sliderValue = centerValue;
+        dateSelectorDisplayVal = value;
+    }
+
+    $: setSlider($selectedDate);
+    $: console.log($selectedDate);
 
     type Marker = {
         position: number;
@@ -116,7 +135,7 @@
         bind:value={sliderValue}
         {min}
         {max}
-        on:input={() => updateViewValue(selectedValue)}
+        on:input={() => updateViewValue($selectedDate)}
         on:change={resetSlider}
         bind:this={sliderElement}
         />

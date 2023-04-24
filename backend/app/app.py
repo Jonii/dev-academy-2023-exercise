@@ -19,11 +19,11 @@ app.add_middleware(
 )
 
 @app.get("/api/bike-trips")
-async def trips():
-    start_time = datetime(2021, 5, 3, 12, 0, 0)
-    end_time = datetime(2021, 5, 3, 13, 0, 0)
-    page = 0
-    page_size = 25
+async def trips(start_time: datetime = None, end_time: datetime = None, page: int = 0, page_size: int = 25):
+    if start_time is None:
+        start_time = datetime(2021, 5, 3, 12, 0, 0)
+    if end_time is None:
+        end_time = datetime(2021, 5, 3, 13, 0, 0)
     trip_list = get_trips(start_time, end_time, page, page_size)
     time.sleep(1)
     print(trip_list)
