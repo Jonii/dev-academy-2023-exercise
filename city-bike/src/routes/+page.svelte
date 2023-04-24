@@ -6,7 +6,7 @@
     import { selectedDate } from './stores';
 
     let isMounted = false;
-    let muteFetch = false;
+    let firstFetch = true;
 
     let data: BikeTrip[] = [];
     const minInMillis = 1000 * 60;
@@ -15,22 +15,21 @@
         const response = await fetch(fetch_url);
         console.log(response.status);
         const rawData: BikeTripRaw = await response.json();
+        console.log(JSON.stringify(rawData.trips[0]));
         data = rawData.trips.map(item => ({
             ...item,
             Return: new Date(item.Return),
             Departure: new Date(item.Departure),
         }));
-        if ($selectedDate.toISOString() !== rawData.start_time) {
-            muteFetch = true;
+        if (firstFetch) {
+            firstFetch = false;
             $selectedDate = new Date(rawData.start_time);
         }
         console.log($selectedDate);
     }
-    
+
     function shouldFetch(): boolean {
-        const fetchIsMuted = !muteFetch;
-        muteFetch = false;
-        return isMounted && fetchIsMuted;
+        return isMounted;
     }
     
     function fetchUrl(start_time: Date | undefined = undefined, end_time: Date | undefined = undefined) {

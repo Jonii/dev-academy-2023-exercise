@@ -1,12 +1,12 @@
 <script lang="ts">
-    import type { BikeTrip, BikeTripRaw } from './types';
+    import type { BikeTrip } from './types';
     
     export let data: BikeTrip[] = [];
     function formatDate(date: Date) {
         return date.toLocaleDateString() + " " + date.toLocaleTimeString("fi-Fi", {
             hour: "2-digit",
             minute: "2-digit",
-            second: "2-digit"
+            second: "2-digit",
         });
     }
     function formatTripDuration(duration: number) {
