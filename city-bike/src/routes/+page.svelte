@@ -10,8 +10,9 @@
 
     let data: BikeTrip[] = [];
     const minInMillis = 1000 * 60;
-    async function fetchData(time: Date | undefined = undefined) {
-        const fetch_url = fetchUrl(time, time ? new Date(time.getTime() + minInMillis) : undefined);
+    async function fetchData(time: Date) {
+        console.log("fetching data");
+        const fetch_url = fetchDataForDateInterval(time, new Date(time.getTime() + minInMillis));
         const response = await fetch(fetch_url);
         console.log(response.status);
         const rawData: BikeTripRaw = await response.json();
@@ -31,8 +32,16 @@
     function shouldFetch(): boolean {
         return isMounted;
     }
+
+    function getStartTime(): Date {
+        return new Date(2021, 4, 1, 0, 0, 0);
+    }
     
-    function fetchUrl(start_time: Date | undefined = undefined, end_time: Date | undefined = undefined) {
+    function fetchDataForDateInterval(start_time: Date, end_time: Date) {
+        start_time = new Date(start_time.getTime())
+        start_time.setMilliseconds(0);
+        end_time = new Date(end_time.getTime());
+        end_time.setMilliseconds(0);
         const baseUrl = `http://localhost:8000/api/bike-trips?`;
         const startTimeQuery = start_time ? `start_time=${start_time.toISOString()}` : '';
         const endTimeQuery = end_time ? `end_time=${end_time.toISOString()}` : '';
@@ -49,7 +58,9 @@
 
     onMount(() => {
         isMounted = true;
-        fetchData();
+        const startTime = getStartTime();
+        fetchData(startTime);
+        $selectedDate = startTime;
     });
     $: shouldFetch() && fetchData($selectedDate);
     

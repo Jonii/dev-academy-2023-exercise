@@ -20,21 +20,17 @@ app.add_middleware(
 )
 
 
-
 @app.get("/api/bike-trips")
-async def trips(start_time: datetime = None, end_time: datetime = None, page: int = 0, page_size: int = 25):
-    if end_time is None and start_time is None:
-        end_time = datetime(2021, 5, 3, 13, 0, 0)
-        start_time = datetime(2021, 5, 3, 12, 0, 0)
-    if start_time is None:
-        raise HTTPException(status_code=400, detail="start_time is required with end_time")
-    if end_time is None:
-        end_time = start_time + timedelta(minutes=15)
+async def trips(start_time: datetime, end_time: datetime):
     print(start_time, end_time)
 
-    trip_list = get_trips(start_time, end_time, page, page_size)
+    trip_list = get_trips(start_time, end_time)
     response = JSONResponse(trip_list)
     response.headers["Cache-Control"] = "public, max-age=600"
     time.sleep(1)
-    print(trip_list)
+    print(trip_list["trips"][0:5])
     return response
+
+@app.get("api/default-time")
+async def default_time():
+    return { "default_time": datetime(2021, 5, 1, 0, 0, 0, 0).isoformat() }

@@ -62,7 +62,7 @@
     }
     $: updateViewValue($selectedDate);
     
-    async function resetSlider() {
+    async function sliderSelectTime() {
         console.log("Resetting slider");
         markers = generateNonLinearMarkers(10, dateSelectorDisplayVal, centerValue);
         
@@ -136,7 +136,7 @@
         {min}
         {max}
         on:input={() => updateViewValue($selectedDate)}
-        on:change={resetSlider}
+        on:change={sliderSelectTime}
         bind:this={sliderElement}
         />
         {#each markers as marker (marker.dateKey)}
