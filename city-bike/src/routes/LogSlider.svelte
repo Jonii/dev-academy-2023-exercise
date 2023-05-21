@@ -126,6 +126,7 @@
     }
 
     $: sliderElement && sliderElement.style.setProperty('--thumb-width', `${Math.round(markerWidth(sliderValue, 100))}px`);
+    $: dateSelectorDisplayVal = new Date($selectedDate.getTime());
 </script>
 
 <div>

@@ -4,9 +4,12 @@
     import Table from './Table.svelte';
     import LogSlider from './LogSlider.svelte';
     import { selectedDate } from './stores';
+    import DatePicker from './DatePicker.svelte';
 
     let isMounted = false;
     let firstFetch = true;
+
+    let dateSelectorInput: string = "2023-05-01";
 
     let data: BikeTrip[] = [];
     const minInMillis = 1000 * 60;
@@ -63,12 +66,12 @@
         $selectedDate = startTime;
     });
     $: shouldFetch() && fetchData($selectedDate);
-    
 </script>
 
 <div class="page-content">
     <p>Here we have bike stuff</p>
     <LogSlider />
+    <DatePicker />
     
     <Table data={data}/>
 </div>
