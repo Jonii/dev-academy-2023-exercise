@@ -3,6 +3,8 @@
     import { selectedDate } from './stores';
 
     let dateInput: string;
+    let timeInput: string;
+
 
     function formatDate(date: Date): string {
         const yearString = date.getFullYear();
@@ -22,12 +24,28 @@
         $selectedDate = date;
     }
 
+    function handleTimeChange() {
+        console.log(timeInput);
+        const time = new Date($selectedDate);
+        const [hours, minutes, seconds] = timeInput.split(':').map(item => parseInt(item));
+        time.setHours(hours, minutes, seconds);
+        $selectedDate = time;
+    }
+
     $: {
         console.log(dateInput);
         if (dateInput !== formatDate($selectedDate)) {
             dateInput = formatDate($selectedDate);
         }
     }
+
+    $: {
+        console.log(timeInput);
+        if (timeInput !== $selectedDate.toTimeString()) {
+            timeInput = $selectedDate.toTimeString().split(' ')[0];
+        }
+    }
 </script>
 
 <input type="date" bind:value={dateInput} on:change={handleDateChange}>
+<input type="time" step="1" bind:value={timeInput} on:change={handleTimeChange}>

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, File, UploadFile
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import time
@@ -34,3 +34,8 @@ async def trips(start_time: datetime, end_time: datetime):
 @app.get("api/default-time")
 async def default_time():
     return { "default_time": datetime(2021, 5, 1, 0, 0, 0, 0).isoformat() }
+
+@app.post("/api/upload")
+async def upload(file: UploadFile):
+    print(file.filename)
+    return {"filename": file.filename}

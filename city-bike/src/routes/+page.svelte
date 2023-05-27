@@ -2,14 +2,14 @@
     import { onMount } from 'svelte';
     import type { BikeTrip, BikeTripRaw } from './types';
     import Table from './Table.svelte';
-    import LogSlider from './LogSlider.svelte';
     import { selectedDate } from './stores';
     import DatePicker from './DatePicker.svelte';
+    import CsvUploader from './CsvUploader.svelte';
+
+    const baseUrl = `http://localhost:8000/api/`;
 
     let isMounted = false;
     let firstFetch = true;
-
-    let dateSelectorInput: string = "2023-05-01";
 
     let data: BikeTrip[] = [];
     const minInMillis = 1000 * 60;
@@ -45,18 +45,25 @@
         start_time.setMilliseconds(0);
         end_time = new Date(end_time.getTime());
         end_time.setMilliseconds(0);
-        const baseUrl = `http://localhost:8000/api/bike-trips?`;
+        
+        const bikeApiURL = baseUrl + 'bike-trips?';
+
         const startTimeQuery = start_time ? `start_time=${start_time.toISOString()}` : '';
         const endTimeQuery = end_time ? `end_time=${end_time.toISOString()}` : '';
         if (startTimeQuery && endTimeQuery) {
-            return baseUrl + startTimeQuery + '&' + endTimeQuery;
+            return bikeApiURL + startTimeQuery + '&' + endTimeQuery;
         } else if (startTimeQuery) {
-            return baseUrl + startTimeQuery;
+            return bikeApiURL + startTimeQuery;
         } else if (endTimeQuery) {
-            return baseUrl + endTimeQuery;
+            return bikeApiURL + endTimeQuery;
         } else {
-            return baseUrl;
+            return bikeApiURL;
         }
+    }
+
+    function handleSubmit(event: Event) {
+        let formData = new FormData();
+        formData
     }
 
     onMount(() => {
@@ -70,9 +77,15 @@
 
 <div class="page-content">
     <p>Here we have bike stuff</p>
-    <LogSlider />
+
+    <CsvUploader />
+  
+    <br>
+  
     <DatePicker />
     
+    <br>
+
     <Table data={data}/>
 </div>
 
