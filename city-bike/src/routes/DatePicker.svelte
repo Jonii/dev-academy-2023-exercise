@@ -32,6 +32,17 @@
         $selectedDate = time;
     }
 
+    function addDays(date: Date, days: number): Date {
+        const result = new Date(date);
+        result.setDate(result.getDate() + days);
+        return result;
+    }
+    function addMinutes(date: Date, minutes: number): Date {
+        const result = new Date(date);
+        result.setMinutes(result.getMinutes() + minutes);
+        return result;
+    }
+
     $: {
         console.log(dateInput);
         if (dateInput !== formatDate($selectedDate)) {
@@ -46,6 +57,38 @@
         }
     }
 </script>
+<div class="container">
+    <div>
+        <div>
+            {$selectedDate.toLocaleDateString(undefined, {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'})}
+        </div>
+        <div>
+            <button on:click={() => $selectedDate = addDays($selectedDate, -1)}>&lt;</button>
+            <input type="date" bind:value={dateInput} on:change={handleDateChange}>
+            <button on:click={() => $selectedDate = addDays($selectedDate, 1)}>&gt;</button>
+        </div>
+    </div>
+    <div>
+        <div style="height:1em">
+        </div>
+        <div>
+            <button on:click={() => $selectedDate = addMinutes($selectedDate, -60)}>&lt;&lt;</button>
+            <button on:click={() => $selectedDate = addMinutes($selectedDate, -5)}>&lt;</button>
+            <input type="time" step="1" bind:value={timeInput} on:change={handleTimeChange}>
+            <button on:click={() => $selectedDate = addMinutes($selectedDate, 5)}>&gt;</button>
+            <button on:click={() => $selectedDate = addMinutes($selectedDate, 60)}>&gt;&gt;</button>
+        </div>
+    </div>
+</div>
 
-<input type="date" bind:value={dateInput} on:change={handleDateChange}>
-<input type="time" step="1" bind:value={timeInput} on:change={handleTimeChange}>
+<style>
+    .container {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+    }
+    .container > div {
+        margin: 0.5rem 3rem;
+    }
+</style>
