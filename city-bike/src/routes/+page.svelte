@@ -13,6 +13,7 @@
 
     let data: BikeTrip[] = [];
     const minInMillis = 1000 * 60;
+    
     async function fetchData(time: Date) {
         console.log("fetching data");
         const fetch_url = fetchDataForDateInterval(time, new Date(time.getTime() + minInMillis));
@@ -39,6 +40,10 @@
     function getStartTime(): Date {
         return new Date(2021, 4, 1, 0, 0, 0);
     }
+
+    function formatDate(date: Date): string {
+        return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}T${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+    }
     
     function fetchDataForDateInterval(start_time: Date, end_time: Date) {
         start_time = new Date(start_time.getTime())
@@ -48,8 +53,8 @@
         
         const bikeApiURL = baseUrl + 'bike-trips?';
 
-        const startTimeQuery = start_time ? `start_time=${start_time.toISOString()}` : '';
-        const endTimeQuery = end_time ? `end_time=${end_time.toISOString()}` : '';
+        const startTimeQuery = `start_time=${formatDate(start_time)}`;
+        const endTimeQuery = `end_time=${formatDate(end_time)}`;
         if (startTimeQuery && endTimeQuery) {
             return bikeApiURL + startTimeQuery + '&' + endTimeQuery;
         } else if (startTimeQuery) {
