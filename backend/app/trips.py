@@ -2,27 +2,26 @@ import polars as pl
 from pathlib import Path
 from datetime import datetime
 
-root_path = Path(__file__).resolve().parents[2]  # It works, Trust Me(tm).
+#root_path = Path(__file__).resolve().parents[2]  # It works, Trust Me(tm).
 
-df = pl.read_csv(
-    root_path / "data/2021-05.csv", infer_schema_length=100000, try_parse_dates=True
-)
-df = df.sort("Departure")
-df = df.head(500000)
+df = pl.DataFrame({
+    "Departure": [],
+    "Return": [],
+    "Departure station id": [],
+    "Departure station name": [],
+    "Return station id": [],
+    "Return station name": [],
+    "Covered distance (m)": [],
+    "Duration (sec.)": [],
+})
 
-# Convert to UTC to make comparison work, Polars can't compare dates with different timezones
-df = df.with_column(
-    pl.col("Departure")
-    .dt.replace_time_zone("Europe/Helsinki")
-    .dt.convert_time_zone("UTC")
-)
-df = df.with_column(
-    pl.col("Return")
-    .dt.replace_time_zone("Europe/Helsinki")
-    .dt.convert_time_zone("UTC")
-)
-print(df.head(5))
-
+def load_csv(csv_file):
+    global df
+    df = pl.read_csv(
+        csv_file, infer_schema_length=100000, try_parse_dates=True
+    )
+    print(df.head(5))
+    return df
 
 def get_trips(start_time_after: datetime, start_time_before: datetime):
     print("serving trips", start_time_after, start_time_before)

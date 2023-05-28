@@ -1,10 +1,14 @@
+import asyncio
+from typing import BinaryIO, Dict
 from fastapi import FastAPI, HTTPException, File, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 import time
 from datetime import datetime, timedelta
 
-from .trips import get_trips
+from uuid import uuid4
+
+from .trips import get_trips, load_csv
 
 app = FastAPI()
 
@@ -38,4 +42,42 @@ async def default_time():
 @app.post("/api/upload")
 async def upload(file: UploadFile):
     print(file.filename)
-    return {"filename": file.filename}
+    unique_id = str(uuid4())
+    file_bytes = await file.read()
+    upload_processing_items[unique_id] = CsvProcessing()
+    asyncio.create_task(process_csv(unique_id, file_bytes))
+    return {
+            "filename": file.filename,
+            "id": unique_id,
+        }
+
+async def process_csv(id, file: BinaryIO):
+    print("processing csv", id)
+    await asyncio.sleep(0.9)
+    try:
+        load_csv(file)
+        upload_processing_items[id].set_done("done")
+    except Exception as e:
+        upload_processing_items[id].set_done("error: {}".format(e))
+class CsvProcessing:
+    def __init__(self):
+        self.status = "processing"
+        self.result: None | str = None
+    
+    def set_done(self, result):
+        self.status = "done"
+        self.result = result
+
+upload_processing_items: Dict[str, CsvProcessing] = {}
+
+async def event_stream(id):
+    while upload_processing_items[id].status == "processing":
+        yield "data: {}\n\n".format(upload_processing_items[id].status)
+        await asyncio.sleep(1)
+    yield "data: {}\n\n".format(upload_processing_items[id].result)
+
+@app.get("/api/status/{id}")
+async def status(id):
+    if id not in upload_processing_items:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return StreamingResponse(event_stream(id), media_type="text/event-stream")
