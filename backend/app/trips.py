@@ -1,5 +1,4 @@
 import polars as pl
-from pathlib import Path
 from datetime import datetime
 
 #root_path = Path(__file__).resolve().parents[2]  # It works, Trust Me(tm).
@@ -14,6 +13,16 @@ class TripCollection:
             "Return station name": [],
             "Covered distance (m)": [],
             "Duration (sec.)": [],
+        },
+        schema={
+            "Departure": pl.Datetime,
+            "Return": pl.Datetime,
+            "Departure station id": pl.Int64,
+            "Departure station name": pl.Utf8,
+            "Return station id": pl.Int64,
+            "Return station name": pl.Utf8,
+            "Covered distance (m)": pl.Float64,
+            "Duration (sec.)": pl.Int64
         })
         self.default_time = datetime(2021, 5, 1, 0, 0, 0, 0).isoformat()
     
@@ -49,9 +58,13 @@ class TripCollection:
             "start_time": start_time_after.isoformat()
         }
     
-    def get_hourly_stats():
-        hourly_stats = df.with_columns(
+    def get_hourly_stats(self, date = None, departure_station_id = None):
+        hourly_stats = self.df.with_columns(
             pl.col('Departure').dt.hour().alias('hour')).with_columns(
             pl.col("Departure").dt.date().alias("date"))
-        hourly_stats.groupby('hour', "date", "Departure station name", "Return station name").agg(pl.count('Duration (sec.)').alias("Count")).collect()
+        if date:
+            hourly_stats = hourly_stats.filter(pl.col("date").dt.date() == date)
+        if departure_station_id:
+            hourly_stats = hourly_stats.filter(pl.col("Departure station id") == departure_station_id)
+        hourly_stats = hourly_stats.groupby('hour', "date", "Departure station name", "Return station name").agg(pl.count('Duration (sec.)').alias("Count")).sort("Count", descending=True)
         return hourly_stats

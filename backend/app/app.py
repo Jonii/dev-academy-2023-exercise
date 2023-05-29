@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException, File, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 import time
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from uuid import uuid4
 
@@ -82,3 +82,7 @@ async def status(id):
     if id not in upload_processing_items:
         raise HTTPException(status_code=404, detail="Item not found")
     return StreamingResponse(event_stream(id), media_type="text/event-stream")
+
+@app.get("/api/trip-count")
+async def trip_count(date: date):
+    return list(trip_collection.get_hourly_stats(date=date).iter_rows(named=True))
