@@ -55,20 +55,7 @@
 
         const startTimeQuery = `start_time=${formatDate(start_time)}`;
         const endTimeQuery = `end_time=${formatDate(end_time)}`;
-        if (startTimeQuery && endTimeQuery) {
-            return bikeApiURL + startTimeQuery + '&' + endTimeQuery;
-        } else if (startTimeQuery) {
-            return bikeApiURL + startTimeQuery;
-        } else if (endTimeQuery) {
-            return bikeApiURL + endTimeQuery;
-        } else {
-            return bikeApiURL;
-        }
-    }
-
-    function handleSubmit(event: Event) {
-        let formData = new FormData();
-        formData
+        return bikeApiURL + startTimeQuery + '&' + endTimeQuery;
     }
 
     onMount(() => {
