@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 
 from uuid import uuid4
 
-from .trips import get_trips, load_csv
+from .trips import TripCollection
 
 app = FastAPI()
 
@@ -23,15 +23,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+trip_collection: TripCollection = TripCollection()
 
 @app.get("/api/bike-trips")
-async def trips(start_time: datetime, end_time: datetime):
+async def trip_search(start_time: datetime, end_time: datetime):
     print(start_time, end_time)
 
-    trip_list = get_trips(start_time, end_time)
+    trip_list = trip_collection.get_trips(start_time, end_time)
     response = JSONResponse(trip_list)
-    response.headers["Cache-Control"] = "public, max-age=600"
-    time.sleep(1)
+    response.headers["Cache-Control"] = "public, max-age=30"
+    time.sleep(0.2)
     print(trip_list["trips"][0:5])
     return response
 
@@ -55,7 +56,7 @@ async def process_csv(id, file: BinaryIO):
     print("processing csv", id)
     await asyncio.sleep(0.9)
     try:
-        load_csv(file)
+        trip_collection.load_csv(file)
         upload_processing_items[id].set_done("done")
     except Exception as e:
         upload_processing_items[id].set_done("error: {}".format(e))

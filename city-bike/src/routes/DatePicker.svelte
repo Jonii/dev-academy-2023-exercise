@@ -27,8 +27,8 @@
     function handleTimeChange() {
         console.log(timeInput);
         const time = new Date($selectedDate);
-        const [hours, minutes, seconds] = timeInput.split(':').map(item => parseInt(item));
-        time.setHours(hours, minutes, seconds);
+        const [hours, minutes] = timeInput.split(':').map(item => parseInt(item));
+        time.setHours(hours, minutes, 0);
         $selectedDate = time;
     }
 
@@ -53,7 +53,7 @@
     $: {
         console.log(timeInput);
         if (timeInput !== $selectedDate.toTimeString()) {
-            timeInput = $selectedDate.toTimeString().split(' ')[0];
+            timeInput = $selectedDate.toTimeString().split(' ')[0].split(':').slice(0, 2).join(':');
         }
     }
 </script>
@@ -72,11 +72,11 @@
         <div style="height:1em">
         </div>
         <div>
-            <button on:click={() => $selectedDate = addMinutes($selectedDate, -60)}>&lt;&lt;</button>
-            <button on:click={() => $selectedDate = addMinutes($selectedDate, -5)}>&lt;</button>
-            <input type="time" step="1" bind:value={timeInput} on:change={handleTimeChange}>
-            <button on:click={() => $selectedDate = addMinutes($selectedDate, 5)}>&gt;</button>
-            <button on:click={() => $selectedDate = addMinutes($selectedDate, 60)}>&gt;&gt;</button>
+            <button on:click={() => $selectedDate = addMinutes($selectedDate, -15)}>&lt;&lt;</button>
+            <button on:click={() => $selectedDate = addMinutes($selectedDate, -1)}>&lt;</button>
+            <input type="time" bind:value={timeInput} on:change={handleTimeChange}>
+            <button on:click={() => $selectedDate = addMinutes($selectedDate, 1)}>&gt;</button>
+            <button on:click={() => $selectedDate = addMinutes($selectedDate, 15)}>&gt;&gt;</button>
         </div>
     </div>
 </div>
