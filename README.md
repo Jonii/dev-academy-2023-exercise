@@ -2,4 +2,10 @@
 
 Based on the task related to Solita Dev Academy. (See `TASK_DESCRIPTION_SOLITA.md`)
 
-Despite being inspired by the Solita Dev Academy "homework", I'm not super keen on completing the task given there. I'm exploring still to find inspiration that sparks my interest. At the moment my two most interesting bits I'm looking at are slider navigation widget, and drawing onto maps.
+This project essentially acts as a frontend/backend combo to interface with a .csv file.
+
+This is somewhat different from the spirit of the assignment, where the idea is to be more generic trip data database,
+with database one can update. I find databases at least this early in development to be quite problematic, CSV interface
+idea allows the design to approximate functional paradigm better without persisting state. Maybe eventually.
+
+Features trip data viewer, with filtering based on time, API for fetching trips, and API for fetching data of trip aggregate data.
