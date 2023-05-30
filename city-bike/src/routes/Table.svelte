@@ -1,6 +1,9 @@
 <script lang="ts">
-    import type { BikeTrip } from './types';
-    
+    import { get } from 'svelte/store';
+    import StationBadge from './StationBadge.svelte';
+    import type { BikeTrip, StationDataSchema } from './types';
+    import { stationData } from './stores';
+
     export let data: BikeTrip[] = [];
     function formatDate(date: Date) {
         return date.toLocaleDateString() + " " + date.toLocaleTimeString("fi-Fi", {
@@ -35,8 +38,8 @@
             <div class="tablecell">{formatDate(datum["Departure"])}</div>
             <div class="tablecell">{formatDate(datum["Return"])}</div>
             <div class="tablecell">{formatTripDuration(datum["Duration (sec.)"])}</div>
-            <div class="tablecell">{datum["Departure station name"]}<br>{datum["Departure station id"]}</div>
-            <div class="tablecell">{datum["Return station name"]}<br>{datum["Return station id"]}</div>
+            <div class="tablecell"><StationBadge stationData = {$stationData.get(datum["Departure station id"])}/></div>
+            <div class="tablecell"><StationBadge stationData = {$stationData.get(datum["Return station id"])}/></div>
             <div class="tablecell">{datum["Covered distance (m)"]/1000} km</div>
         </div>
     {/each}

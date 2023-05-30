@@ -94,8 +94,8 @@ async def daily_stats(return_station_id: int | None = None, departure_station_id
     return list(trip_collection.get_daily_stats(departure_station_id=departure_station_id, return_station_id=return_station_id).iter_rows(named=True))
 
 @app.get("/api/stations/by_id/{station_id}")
-async def station(station_id: int):
-    station_list = stations.get_stations_by_id(station_id)
+async def station_by_id(station_id: int):
+    station_list = stations.find_stations(id = station_id)
     if len(station_list) == 0:
         raise HTTPException(status_code=404, detail="Station not found")
     if len(station_list) > 1:
@@ -103,13 +103,18 @@ async def station(station_id: int):
     return station_list[0]
 
 @app.get("/api/stations/by_fid/{station_fid}")
-async def station(station_fid: int):
-    station_list = stations.get_stations_by_fid(station_fid)
+async def station_by_fid(station_fid: int):
+    station_list = stations.find_stations(fid = station_fid)
     if len(station_list) == 0:
         raise HTTPException(status_code=404, detail="Station not found")
     if len(station_list) > 1:
         raise HTTPException(status_code=500, detail="Multiple stations found")
     return station_list[0]
 
-def station_stats(station_data):
-    stats = trip_collection.get_trips_by_station(station_data["ID"])
+@app.get("/api/stations/by_id")
+def station_list_by_id():
+    return stations.all_stations()
+
+@app.get("/api/stations/by_fid")
+def station_list_by_fid():
+    return stations.all_stations_by_fid()

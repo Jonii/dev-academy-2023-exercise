@@ -1,7 +1,7 @@
 <script lang="ts">
-    import type { stationDataSchema } from "./types";
+    import type { StationDataSchema } from "./types";
 
-    export let stationData: stationDataSchema | undefined = undefined;
+    export let stationData: StationDataSchema | undefined = undefined;
     export const size: number = 1;
 </script>
 

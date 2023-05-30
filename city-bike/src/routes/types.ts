@@ -23,7 +23,7 @@ type BikeTripRaw = {
     start_time: string;
 }
 
-type stationDataSchema = {
+type StationDataSchema = {
     FID: number,
     ID: number,
     Nimi: String,
@@ -39,4 +39,4 @@ type stationDataSchema = {
     y: number
 }
 
-export type { stationDataSchema, BikeTrip, BikeTripRaw };
+export type { StationDataSchema, BikeTrip, BikeTripRaw };

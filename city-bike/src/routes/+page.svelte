@@ -1,19 +1,29 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import type { BikeTrip, BikeTripRaw } from './types';
+    import type { BikeTrip, BikeTripRaw, StationDataSchema } from './types';
     import Table from './Table.svelte';
-    import { selectedDate } from './stores';
+    import { selectedDate, stationData } from './stores';
     import DatePicker from './DatePicker.svelte';
     import CsvUploader from './CsvUploader.svelte';
 
     const baseUrl = `http://localhost:8000/api/`;
+
+    let stationsById = new Map<number, StationDataSchema>();
 
     let isMounted = false;
     let firstFetch = true;
 
     let data: BikeTrip[] = [];
     const minInMillis = 1000 * 60;
-    
+
+    async function fetchStationData() {
+        const response = await fetch(baseUrl + 'stations/by_id/');
+        const data = await response.json();
+        for (const key in data) {
+            $stationData.set(Number(key), data[key]);
+        }
+        $stationData = $stationData;
+    }
     async function fetchData(time: Date) {
         console.log("fetching data");
         const fetch_url = fetchDataForDateInterval(time, new Date(time.getTime() + minInMillis));
@@ -60,6 +70,7 @@
 
     onMount(() => {
         isMounted = true;
+        fetchStationData();
         const startTime = getStartTime();
         fetchData(startTime);
         $selectedDate = startTime;

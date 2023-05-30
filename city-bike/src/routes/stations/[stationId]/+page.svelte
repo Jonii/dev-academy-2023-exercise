@@ -1,12 +1,12 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import type { stationDataSchema } from '../../types.js';
+    import type { StationDataSchema } from '../../types.js';
     import StationBadge from '../../StationBadge.svelte';
 
     export let data;
     const stationId = data.stationId;
 
-    let stationData: stationDataSchema;
+    let stationData: StationDataSchema;
 
     function getStationData() {
         fetch(`http://localhost:8000/api/stations/by_id/${stationId}`)
