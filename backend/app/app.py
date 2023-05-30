@@ -1,14 +1,15 @@
 import asyncio
 from typing import BinaryIO, Dict
-from fastapi import FastAPI, HTTPException, File, UploadFile
+from fastapi import FastAPI, HTTPException, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 import time
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 
 from uuid import uuid4
 
 from .trips import TripCollection
+from .stations import StationCollection
 
 app = FastAPI()
 
@@ -24,6 +25,7 @@ app.add_middleware(
 )
 
 trip_collection: TripCollection = TripCollection()
+stations = StationCollection()
 
 @app.get("/api/bike-trips")
 async def trip_search(start_time: datetime, end_time: datetime):
@@ -86,3 +88,21 @@ async def status(id):
 @app.get("/api/trip-count")
 async def trip_count(date: date):
     return list(trip_collection.get_hourly_stats(date=date).iter_rows(named=True))
+
+@app.get("/api/stations/by_id/{station_id}")
+async def station(station_id: int):
+    station_list = stations.get_stations_by_id(station_id)
+    if len(station_list) == 0:
+        raise HTTPException(status_code=404, detail="Station not found")
+    if len(station_list) > 1:
+        raise HTTPException(status_code=500, detail="Multiple stations found")
+    return station_list[0]
+
+@app.get("/api/stations/by_fid/{station_fid}")
+async def station(station_fid: int):
+    station_list = stations.get_stations_by_fid(station_fid)
+    if len(station_list) == 0:
+        raise HTTPException(status_code=404, detail="Station not found")
+    if len(station_list) > 1:
+        raise HTTPException(status_code=500, detail="Multiple stations found")
+    return station_list[0]
