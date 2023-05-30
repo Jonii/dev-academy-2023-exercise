@@ -48,9 +48,9 @@ class TripCollection:
             .filter(pl.col("Departure") > start_time_after)
             .filter(pl.col("Departure") < start_time_before)
         )
-        some_trips = some_trips.with_column(
+        some_trips = some_trips.with_columns(
             pl.col("Departure").apply(lambda x: x.isoformat(), return_dtype=pl.Utf8)
-        ).with_column(pl.col("Return").apply(lambda x: x.isoformat(), return_dtype=pl.Utf8)).collect()
+        ).with_columns(pl.col("Return").apply(lambda x: x.isoformat(), return_dtype=pl.Utf8)).collect()
 
         trip_list = list(
             some_trips.iter_rows(named=True)
