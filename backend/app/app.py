@@ -86,8 +86,12 @@ async def status(id):
     return StreamingResponse(event_stream(id), media_type="text/event-stream")
 
 @app.get("/api/trip-count")
-async def trip_count(date: date):
-    return list(trip_collection.get_hourly_stats(date=date).iter_rows(named=True))
+async def trip_count(date: date = None, departure_station_id: int = None):
+    return list(trip_collection.get_hourly_stats(date=date, departure_station_id=departure_station_id).iter_rows(named=True))
+
+@app.get("/api/daily_stats")
+async def daily_stats(return_station_id: int | None = None, departure_station_id: int | None = None):
+    return list(trip_collection.get_daily_stats(departure_station_id=departure_station_id, return_station_id=return_station_id).iter_rows(named=True))
 
 @app.get("/api/stations/by_id/{station_id}")
 async def station(station_id: int):
@@ -106,3 +110,6 @@ async def station(station_fid: int):
     if len(station_list) > 1:
         raise HTTPException(status_code=500, detail="Multiple stations found")
     return station_list[0]
+
+def station_stats(station_data):
+    stats = trip_collection.get_trips_by_station(station_data["ID"])

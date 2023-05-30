@@ -27,13 +27,15 @@ class TripCollection:
         self.default_time = datetime(2021, 5, 1, 0, 0, 0, 0).isoformat()
     
     def load_csv(self, csv_file):
-        self.df = pl.read_csv(
-            csv_file, infer_schema_length=100000, try_parse_dates=True
+        raw_df = pl.read_csv(
+            csv_file, infer_schema_length=100000, try_parse_dates=True, columns=self.df.columns
         )
+        unique_rows_only = raw_df.unique()
+        full_rows_only = unique_rows_only.drop_nulls()
         # Filter invalid trips
         min_trip_duration_seconds = 10
         min_trip_distance_meters = 10
-        self.df = self.df.filter(pl.col("Duration (sec.)") >= min_trip_duration_seconds
+        self.df = full_rows_only.filter(pl.col("Duration (sec.)") >= min_trip_duration_seconds
                        ).filter(pl.col("Covered distance (m)") >= min_trip_distance_meters)
         print(self.df.head(5))
         return self.df
@@ -68,3 +70,13 @@ class TripCollection:
             hourly_stats = hourly_stats.filter(pl.col("Departure station id") == departure_station_id)
         hourly_stats = hourly_stats.groupby('hour', "date", "Departure station name", "Return station name").agg(pl.count('Duration (sec.)').alias("Count")).sort("Count", descending=True)
         return hourly_stats
+
+    def get_daily_stats(self, departure_station_id = None, return_station_id = None):
+        daily_stats = self.df.with_columns(
+            pl.col('Departure').dt.date().alias('date'))
+        if departure_station_id:
+            daily_stats = daily_stats.filter(pl.col("Departure station id") == departure_station_id)
+        if return_station_id:
+            daily_stats = daily_stats.filter(pl.col("Return station id") == return_station_id)
+        daily_stats = daily_stats.groupby('date', "Departure station name", "Return station name").agg(pl.count('Duration (sec.)').alias("Count")).sort("Count", descending=True)
+        return daily_stats
