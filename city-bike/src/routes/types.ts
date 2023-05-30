@@ -23,4 +23,20 @@ type BikeTripRaw = {
     start_time: string;
 }
 
-export type { BikeTrip, BikeTripRaw };
+type stationDataSchema = {
+    FID: number,
+    ID: number,
+    Nimi: String,
+    Namn: String,
+    Name: String,
+    Osoite: String,
+    Adress: String,
+    Kaupunki: String,
+    Stad: String,
+    Operaattor: String,
+    Kapasiteet: number,
+    x: number,
+    y: number
+}
+
+export type { stationDataSchema, BikeTrip, BikeTripRaw };

@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import type { stationDataSchema } from './types.js';
-    import Station from '../../Station.svelte';
+    import type { stationDataSchema } from '../../types.js';
+    import StationBadge from '../../StationBadge.svelte';
 
     export let data;
     const stationId = data.stationId;
@@ -21,5 +21,5 @@
     });
 </script>
 <h1>
-    <Station { stationData } />
+    <StationBadge { stationData } />
 </h1>

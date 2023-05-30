@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { stationDataSchema } from "./stations/[stationId]/types";
+    import type { stationDataSchema } from "./types";
 
     export let stationData: stationDataSchema | undefined = undefined;
     export const size: number = 1;
@@ -18,8 +18,8 @@
             <div class="city">
                 City: {stationData.Kaupunki}
             </div>
-            <div class="operator">
-                Operator: {stationData.Operaattor}
+            <div class="address">
+                {stationData.Osoite}
             </div>
         </div>
     </div>
@@ -52,11 +52,11 @@ Station not found
         font-weight: bold;
     }
     
-    .station-badge .id, .station-badge .city, .station-badge .operator {
+    .station-badge .id, .station-badge .city, .operator, .address {
         font-size: 0.6em;
         color: #777;
     }
-    .operator {
+    .operator, .address {
         grid-column: 1 / 3;
     }
     </style>
