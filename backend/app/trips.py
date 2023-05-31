@@ -28,7 +28,7 @@ class TripCollection:
     
     def load_csv(self, csv_file):
         raw_df = pl.read_csv(
-            csv_file, infer_schema_length=100000, try_parse_dates=True, columns=self.df.columns
+            csv_file, columns=self.df.columns, dtypes=self.df.dtypes
         )
         unique_rows_only = raw_df.unique()
         full_rows_only = unique_rows_only.drop_nulls()
@@ -79,4 +79,5 @@ class TripCollection:
         if return_station_id:
             daily_stats = daily_stats.filter(pl.col("Return station id") == return_station_id)
         daily_stats = daily_stats.groupby('date', "Departure station name", "Return station name").agg(pl.count('Duration (sec.)').alias("Count")).sort("Count", descending=True)
+        print(daily_stats.head(5))
         return daily_stats

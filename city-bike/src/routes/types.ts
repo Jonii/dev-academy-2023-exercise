@@ -39,4 +39,13 @@ type StationDataSchema = {
     y: number
 }
 
-export type { StationDataSchema, BikeTrip, BikeTripRaw };
+const exampleStats = [{"date":"2021-05-22","Departure station name":"Hanasaari","Return station name":"Mellstenintie","Count":8}];
+
+type DailyStats = {
+    date: string;
+    "Departure station name": string;
+    "Return station name": string;
+    Count: number;
+}
+
+export type { StationDataSchema, BikeTrip, BikeTripRaw, DailyStats };
